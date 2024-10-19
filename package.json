@@ -1,0 +1,30 @@
+{
+  "name": "devcohort",
+  "version": "1.0.0",
+  "description": "backend for devcohort",
+  "main": "index.js",
+  "scripts": {
+   "start": "node src/app.js",
+   "dev": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ansonsd5/devcohort.git"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "javascript",
+    "mongodb"
+  ],
+  "author": "Anson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ansonsd5/devcohort/issues"
+  },
+  "homepage": "https://github.com/Ansonsd5/devcohort#readme",
+  "dependencies": {
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7"
+  }
+}
