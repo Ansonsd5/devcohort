@@ -1,17 +1,40 @@
 const express = require("express");
 
 const app = express();
-const port = process.env.PORT || 3000; 
-console.log(port);
+const port = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("We started here");
-});
-
-app.get("/test", (req, res) => {
-  res.send("What's the recent fun you had?");
-});
-
-app.use('/',(req,res)=>res.send("404 Not found"))
+app.use(
+  "/user",
+  (req, res, next) => {
+    console.log("Handling request response 1");
+    // res.send("Request handler 1");
+    next();
+  },
+  (req, res,next) => {
+    console.log("Handling request response 2");
+    next();
+    res.send("Request handler 2");
+  },
+  (req, res) => {
+    console.log("Handling request response 3");
+    res.send("Request handler 3");
+  }
+);
 
 app.listen(port, () => console.log(`Server started at port ${port}`));
+
+
+/*
+1: Request response
+It will just console.log 
+and next() will be called
+
+2: Request response
+It will console and calls next() but doesnt move to next line instead it will call the next req,res
+
+3: Request response
+It will  console and also send response as Request handler 3,
+then the http connection gets closed but control moves to the 2nd req,res next line i,e;
+res.send("Request handler 2"); but since there is no http request alive to send the response so we will get the error as
+Cannot set headers after they are sent to the client
+*/
