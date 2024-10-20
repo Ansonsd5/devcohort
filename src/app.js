@@ -13,7 +13,9 @@ app.use(
   (req, res,next) => {
     console.log("Handling request response 2");
     next();
+    console.log("second invoke")
     res.send("Request handler 2");
+    console.log("second invoke after")
   },
   (req, res) => {
     console.log("Handling request response 3");
