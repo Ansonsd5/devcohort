@@ -4,8 +4,8 @@
   "description": "backend for devcohort",
   "main": "index.js",
   "scripts": {
-   "start": "node src/app.js",
-   "dev": "nodemon src/app.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   "homepage": "https://github.com/Ansonsd5/devcohort#readme",
   "dependencies": {
     "express": "^4.21.1",
+    "mongoose": "^8.7.2",
     "nodemon": "^3.1.7"
   }
 }
