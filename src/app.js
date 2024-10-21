@@ -1,17 +1,22 @@
 const express = require("express");
 
 const app = express();
-const port = process.env.PORT || 3000; 
-console.log(port);
+const port = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("We started here");
+app.use("/admin", (req, res, next) => {
+  const token = "eweweedd";
+  const isAuthorized = token === "ewewewedd";
+  if (!isAuthorized) {
+    res.status(401).send("Unauthorized request");
+  } else {
+    next();
+  }
 });
 
-app.get("/test", (req, res) => {
-  res.send("What's the recent fun you had?");
+app.use("/admin/auth", (req, res) => {
+  res.status(201).send("What would you like to access");
 });
 
-app.use('/',(req,res)=>res.send("404 Not found"))
+app.use("/", (req, res) => res.send("404 Not found"));
 
 app.listen(port, () => console.log(`Server started at port ${port}`));
