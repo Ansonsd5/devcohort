@@ -18,7 +18,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.get("/getFeed", async (req, res) => {
-  console.log("entering feed")
+  console.log("entering feed");
   try {
     const allUsers = await User.find({});
     if (allUsers.length) {
@@ -41,29 +41,39 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.delete('/deleteUser', async (req,res) =>{
+app.delete("/deleteUser", async (req, res) => {
   try {
     const userId = req.body.userId;
     await User.findByIdAndDelete(userId);
-    res.send("User deleted Successfully")
+    res.send("User deleted Successfully");
   } catch (error) {
     res.status(400).send("Somthing went wtrong");
-    
   }
 });
 
-app.patch('/update', async (req,res) =>{
+app.patch("/update", async (req, res) => {
   const data = req.body;
   const userId = req.body.userId;
 
   try {
-    const user = await User.findByIdAndUpdate({_id :userId},data);
-    res.send("User updated")
+    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    res.send("User updated");
   } catch (error) {
     res.status(400).send("Somthing went wtrong");
-    
   }
-})
+});
+
+app.patch("/update-email", async (req, res) => {
+  const email = req.body.emailId;
+  const userId = req.body.userId;
+  try {
+    const data = await User.findByIdAndUpdate(userId ,{emailId :email});
+    console.log("before updated", data);
+    res.status(200).send("Updated email");
+  } catch (error) {
+    res.status(500).send("Something went wrong!!");
+  }
+});
 
 connectDB().then(() => {
   try {
