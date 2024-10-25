@@ -9,8 +9,11 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+const MAX_SKILLS = 4;
+
 app.post("/signup", async (req, res) => {
-  console.log("its coming here", req.body);
+  
+ 
   const user = new User(req.body);
 try {
   await user.save();
@@ -56,11 +59,21 @@ app.delete("/deleteUser", async (req, res) => {
   }
 });
 
-app.patch("/update", async (req, res) => {
+app.patch("/update/:userId", async (req, res) => {
   const data = req.body;
-  const userId = req.body.userId;
+  const userId = req.params?.userId;
+  const ALLOWED_FIELDS = ['firstName','lastName','password','age','gender','skills'];
 
+  const isUpdateAllow = Object.keys(data).every((k)=> ALLOWED_FIELDS.includes(k))
   try {
+
+    
+    if(req.body?.skills?.length>MAX_SKILLS){
+      throw new Error(`User can have at most ${MAX_SKILLS} skills`)
+    }
+    if(!isUpdateAllow){
+      throw new Error("Update not Allowed")
+    }
     const user = await User.findByIdAndUpdate({ _id: userId }, data,{runValidators:true,returnDocument: 'after'});
     res.send("User updated");
   } catch (error) {
