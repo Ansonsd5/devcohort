@@ -7,7 +7,7 @@ const { validateSignUpData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 
-const jwt = require("jsonwebtoken");
+const { userAuthentication } = require("./middlewares/auth");
 // const cookiesparser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -56,15 +56,18 @@ app.post("/login", async (req, res) => {
 
   try {
     validateLoginData(req);
+
     const userData = await user.findOne({ emailId: emailId });
     if (!userData) {
       throw new Error("Invalid Credentials");
     }
-    const jwtToken = await jwt.sign({ _id: userData?._id }, "JWT@Secret");
-    // const isPasswordCorrect = await bcrypt.compare(password, userData?.password);
+    const validPassword = await userData.validatePassword(password);
+    const jwtToken = await userData.getJWT();
 
-    if (jwtToken) {
-      res.cookie("token", jwtToken);
+    if (validPassword) {
+      res.cookie("token", jwtToken, {
+        expires: new Date(Date.now() + 8 * 360000),
+      });
       res.status(202).send("Authorized successfully");
     } else {
       throw new Error("Invalid Credentials");
@@ -76,31 +79,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuthentication, async (req, res) => {
   try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-    const deCoded = await jwt.verify(token, "JWT@Secret");
-
-    if (deCoded) {
-      const { _id } = deCoded;
-      const profileData = await user.findOne({ _id });
-      if (profileData) {
-        const { firstName, lastName, age, gender, emailId, skills } =
-          profileData;
-        res.status(200).send({
-          firstName: firstName,
-          lastName: lastName,
-          age: age,
-          gender: gender,
-          email: emailId,
-          skills: skills,
-        });
-      } else {
-        throw new Error("User not found");
-      }
+    if (req?.userData) {
+      const { firstName, lastName, age, gender, emailId, skills } =
+        req.userData;
+      res.status(200).send({
+        firstName: firstName,
+        lastName: lastName,
+        age: age,
+        gender: gender,
+        email: emailId,
+        skills: skills,
+      });
     } else {
-      throw new Error("Invalid Token!!!");
+      throw new Error("User Data not Found");
     }
   } catch (error) {
     res.status(404).send(`Somthing went wrong ${error.message}`);
