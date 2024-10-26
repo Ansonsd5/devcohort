@@ -5,11 +5,15 @@ const { default: mongoose, model } = require("mongoose");
 const user = require("./models/user");
 const { validateSignUpData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
 
+const jwt = require("jsonwebtoken");
+// const cookiesparser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 const MAX_SKILLS = 4;
 
@@ -56,10 +60,11 @@ app.post("/login", async (req, res) => {
     if (!userData) {
       throw new Error("Invalid Credentials");
     }
+    const jwtToken = await jwt.sign({ _id: userData?._id }, "JWT@Secret");
+    // const isPasswordCorrect = await bcrypt.compare(password, userData?.password);
 
-    const isPasswordCorrect = await bcrypt.compare(password, userData?.password);
-
-    if (isPasswordCorrect) {
+    if (jwtToken) {
+      res.cookie("token", jwtToken);
       res.status(202).send("Authorized successfully");
     } else {
       throw new Error("Invalid Credentials");
@@ -68,6 +73,37 @@ app.post("/login", async (req, res) => {
     res
       .status(401)
       .send(`Unauthorized: Invalid Credentials : ${error.message}`);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    const { token } = cookie;
+    const deCoded = await jwt.verify(token, "JWT@Secret");
+
+    if (deCoded) {
+      const { _id } = deCoded;
+      const profileData = await user.findOne({ _id });
+      if (profileData) {
+        const { firstName, lastName, age, gender, emailId, skills } =
+          profileData;
+        res.status(200).send({
+          firstName: firstName,
+          lastName: lastName,
+          age: age,
+          gender: gender,
+          email: emailId,
+          skills: skills,
+        });
+      } else {
+        throw new Error("User not found");
+      }
+    } else {
+      throw new Error("Invalid Token!!!");
+    }
+  } catch (error) {
+    res.status(404).send(`Somthing went wrong ${error.message}`);
   }
 });
 
